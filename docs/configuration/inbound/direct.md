@@ -9,6 +9,7 @@
   
   ... // Listen Fields
 
+  "tls": {},
   "network": "udp",
   "override_address": "1.0.0.1",
   "override_port": 53

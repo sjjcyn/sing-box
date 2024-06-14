@@ -23,7 +23,7 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 	case C.TypeTProxy:
 		return NewTProxy(ctx, router, logger, options.Tag, options.TProxyOptions), nil
 	case C.TypeDirect:
-		return NewDirect(ctx, router, logger, options.Tag, options.DirectOptions), nil
+		return NewDirect(ctx, router, logger, options.Tag, options.DirectOptions)
 	case C.TypeSOCKS:
 		return NewSocks(ctx, router, logger, options.Tag, options.SocksOptions), nil
 	case C.TypeHTTP:

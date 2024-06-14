@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/sagernet/sing-box/adapter"
+	"github.com/sagernet/sing-box/common/tls"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/buf"
+	E "github.com/sagernet/sing/common/exceptions"
 	M "github.com/sagernet/sing/common/metadata"
 	N "github.com/sagernet/sing/common/network"
 	"github.com/sagernet/sing/common/udpnat"
@@ -20,12 +23,13 @@ var _ adapter.Inbound = (*Direct)(nil)
 
 type Direct struct {
 	myInboundAdapter
+	tlsConfig           tls.ServerConfig
 	udpNat              *udpnat.Service[netip.AddrPort]
 	overrideOption      int
 	overrideDestination M.Socksaddr
 }
 
-func NewDirect(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.DirectInboundOptions) *Direct {
+func NewDirect(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.DirectInboundOptions) (*Direct, error) {
 	options.UDPFragmentDefault = true
 	inbound := &Direct{
 		myInboundAdapter: myInboundAdapter{
@@ -48,6 +52,13 @@ func NewDirect(ctx context.Context, router adapter.Router, logger log.ContextLog
 		inbound.overrideOption = 3
 		inbound.overrideDestination = M.Socksaddr{Port: options.OverridePort}
 	}
+	if options.TLS != nil {
+		tlsConfig, err := tls.NewServer(ctx, logger, common.PtrValueOrDefault(options.TLS))
+		if err != nil {
+			return nil, err
+		}
+		inbound.tlsConfig = tlsConfig
+	}
 	var udpTimeout time.Duration
 	if options.UDPTimeout != 0 {
 		udpTimeout = time.Duration(options.UDPTimeout)
@@ -58,10 +69,34 @@ func NewDirect(ctx context.Context, router adapter.Router, logger log.ContextLog
 	inbound.connHandler = inbound
 	inbound.packetHandler = inbound
 	inbound.packetUpstream = inbound.udpNat
-	return inbound
+	return inbound, nil
+}
+
+func (d *Direct) Start() error {
+	if d.tlsConfig != nil {
+		err := d.tlsConfig.Start()
+		if err != nil {
+			return E.Cause(err, "create TLS config")
+		}
+	}
+	return d.myInboundAdapter.Start()
+}
+
+func (d *Direct) Close() error {
+	return common.Close(
+		&d.myInboundAdapter,
+		d.tlsConfig,
+	)
 }
 
 func (d *Direct) NewConnection(ctx context.Context, conn net.Conn, metadata adapter.InboundContext) error {
+	var err error
+	if d.tlsConfig != nil {
+		conn, err = tls.ServerHandshake(ctx, conn, d.tlsConfig)
+		if err != nil {
+			return err
+		}
+	}
 	switch d.overrideOption {
 	case 1:
 		metadata.Destination = d.overrideDestination
