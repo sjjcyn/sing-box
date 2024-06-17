@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/sagernet/sing-box/adapter"
+	"github.com/sagernet/sing-box/common/tls"
 	"github.com/sagernet/sing-box/common/urltest"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/experimental"
@@ -50,6 +51,7 @@ type Server struct {
 	mode           string
 	modeList       []string
 	modeUpdateHook chan<- struct{}
+	tlsConfig      tls.ServerConfig
 
 	externalController       bool
 	externalUI               string
@@ -139,6 +141,13 @@ func NewServer(ctx context.Context, router adapter.Router, logFactory log.Observ
 			})
 		})
 	}
+	if options.TLS != nil {
+		tlsConfig, err := tls.NewServer(ctx, server.logger, common.PtrValueOrDefault(options.TLS))
+		if err != nil {
+			return nil, err
+		}
+		server.tlsConfig = tlsConfig
+	}
 	return server, nil
 }
 
@@ -156,9 +165,15 @@ func (s *Server) PreStart() error {
 }
 
 func (s *Server) Start() error {
+	if s.tlsConfig != nil {
+		err := s.tlsConfig.Start()
+		if err != nil {
+			return E.Cause(err, "create TLS config")
+		}
+	}
 	if s.externalController {
 		s.checkAndDownloadExternalUI()
-		listener, err := net.Listen("tcp", s.httpServer.Addr)
+		listener, err := tls.NewListener(s.ctx, s.httpServer.Addr, s.tlsConfig)
 		if err != nil {
 			return E.Cause(err, "external controller listen error")
 		}
