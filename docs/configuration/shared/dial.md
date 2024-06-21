@@ -6,6 +6,7 @@
   "bind_interface": "en0",
   "inet4_bind_address": "0.0.0.0",
   "inet6_bind_address": "::",
+  "server_addresses": [],
   "routing_mark": 1234,
   "reuse_addr": false,
   "connect_timeout": "5s",
@@ -38,6 +39,12 @@ The IPv4 address to bind to.
 #### inet6_bind_address
 
 The IPv6 address to bind to.
+
+#### server_addresses
+
+Addresses used to dial outbound.
+
+If set, outbound's `server` will be ignored 
 
 #### routing_mark
 
