@@ -38,11 +38,16 @@ func DialSlowContext(dialer *tcpDialer, ctx context.Context, network string, des
 			return dialContextConcurrently(dialer.Dialer, ctx, network, destination.AddrString())
 		}
 	}
+	conn, err := dialContextConcurrently(dialer.Dialer, ctx, network, destination.String())
+	if err != nil {
+		return nil, err
+	}
 	return &slowOpenConn{
 		dialer:      dialer,
 		ctx:         ctx,
 		network:     network,
 		destination: destination,
+		conn:        conn,
 		create:      make(chan struct{}),
 	}, nil
 }
@@ -113,7 +118,10 @@ func (c *slowOpenConn) Write(b []byte) (n int, err error) {
 }
 
 func (c *slowOpenConn) Close() error {
-	return common.Close(c.conn)
+	if c.conn != nil {
+		return common.Close(c.conn)
+	}
+	return nil
 }
 
 func (c *slowOpenConn) LocalAddr() net.Addr {
