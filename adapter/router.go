@@ -96,6 +96,7 @@ type Rule interface {
 
 type DNSRule interface {
 	Rule
+	StopFallthrough() bool
 	DisableCache() bool
 	RewriteTTL() *uint32
 	ClientSubnet() *netip.Prefix

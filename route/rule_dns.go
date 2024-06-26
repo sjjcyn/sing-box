@@ -128,10 +128,15 @@ func NewFallbackRules(router adapter.Router, logger log.ContextLogger, fbOptions
 }
 
 type abstractDNSRule struct {
-	fallbackRules []adapter.FallbackRule
-	disableCache  bool
-	rewriteTTL    *uint32
-	clientSubnet  *netip.Prefix
+	fallbackRules   []adapter.FallbackRule
+	stopFallthrough bool
+	disableCache    bool
+	rewriteTTL      *uint32
+	clientSubnet    *netip.Prefix
+}
+
+func (r *abstractDNSRule) StopFallthrough() bool {
+	return r.stopFallthrough
 }
 
 func (r *abstractDNSRule) DisableCache() bool {
@@ -221,6 +226,7 @@ func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options 
 		},
 		abstractDNSRule: abstractDNSRule{
 			fallbackRules,
+			options.StopFallthrough,
 			options.DisableCache,
 			options.RewriteTTL,
 			(*netip.Prefix)(options.ClientSubnet),
@@ -467,6 +473,7 @@ func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options 
 		},
 		abstractDNSRule: abstractDNSRule{
 			fallbackRules,
+			options.StopFallthrough,
 			options.DisableCache,
 			options.RewriteTTL,
 			(*netip.Prefix)(options.ClientSubnet),
