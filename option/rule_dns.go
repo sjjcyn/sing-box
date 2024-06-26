@@ -123,6 +123,7 @@ type DefaultDNSRule struct {
 	RuleSetIPCIDRMatchSource bool                   `json:"rule_set_ipcidr_match_source,omitempty"`
 	Invert                   bool                   `json:"invert,omitempty"`
 	Server                   string                 `json:"server,omitempty"`
+	StopFallthrough          bool                   `json:"stop_fallthrough,omitempty"`
 	DisableCache             bool                   `json:"disable_cache,omitempty"`
 	RewriteTTL               *uint32                `json:"rewrite_ttl,omitempty"`
 	ClientSubnet             *AddrPrefix            `json:"client_subnet,omitempty"`
@@ -132,6 +133,7 @@ func (r DefaultDNSRule) IsValid() bool {
 	var defaultValue DefaultDNSRule
 	defaultValue.Invert = r.Invert
 	defaultValue.Server = r.Server
+	defaultValue.StopFallthrough = r.StopFallthrough
 	defaultValue.DisableCache = r.DisableCache
 	defaultValue.RewriteTTL = r.RewriteTTL
 	defaultValue.ClientSubnet = r.ClientSubnet
@@ -139,13 +141,14 @@ func (r DefaultDNSRule) IsValid() bool {
 }
 
 type LogicalDNSRule struct {
-	Mode         string      `json:"mode"`
-	Rules        []DNSRule   `json:"rules,omitempty"`
-	Invert       bool        `json:"invert,omitempty"`
-	Server       string      `json:"server,omitempty"`
-	DisableCache bool        `json:"disable_cache,omitempty"`
-	RewriteTTL   *uint32     `json:"rewrite_ttl,omitempty"`
-	ClientSubnet *AddrPrefix `json:"client_subnet,omitempty"`
+	Mode            string      `json:"mode"`
+	Rules           []DNSRule   `json:"rules,omitempty"`
+	Invert          bool        `json:"invert,omitempty"`
+	Server          string      `json:"server,omitempty"`
+	StopFallthrough bool        `json:"stop_fallthrough,omitempty"`
+	DisableCache    bool        `json:"disable_cache,omitempty"`
+	RewriteTTL      *uint32     `json:"rewrite_ttl,omitempty"`
+	ClientSubnet    *AddrPrefix `json:"client_subnet,omitempty"`
 }
 
 func (r LogicalDNSRule) IsValid() bool {

@@ -255,11 +255,17 @@ func (r *Router) Exchange(ctx context.Context, message *mDNS.Msg) (*mDNS.Msg, er
 			break
 		}
 		if response.Rcode != mDNS.RcodeSuccess {
-			break
+			if rule.StopFallthrough() {
+				break
+			}
+			continue
 		}
 		addrs, _ := dns.MessageToAddresses(response)
 		if len(addrs) == 0 {
-			break
+			if rule.StopFallthrough() {
+				break
+			}
+			continue
 		}
 		fbRules := rule.FallbackRules()
 		if len(fbRules) == 0 {
@@ -361,10 +367,16 @@ func (r *Router) lookup(ctx context.Context, domain string, strategy dns.DomainS
 		if rule == nil {
 			break
 		}
+		if _, isRcode := transport.(*dns.RCodeTransport); isRcode {
+			break
+		}
 		if addressLimit && rejected {
 			continue
 		}
 		if err != nil {
+			if errors.Is(err, dns.RCodeNameError) && !rule.StopFallthrough() {
+				continue
+			}
 			break
 		}
 		fbRules := rule.FallbackRules()
