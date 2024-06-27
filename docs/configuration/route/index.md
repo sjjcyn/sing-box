@@ -19,7 +19,9 @@
     "auto_detect_interface": false,
     "override_android_vpn": false,
     "default_interface": "en0",
-    "default_mark": 233
+    "default_mark": 233,
+    "udp_disable_domain_unmapping": false,
+    "stop_always_resolve_udp": false
   }
 }
 ```
@@ -82,3 +84,9 @@ Takes no effect if `auto_detect_interface` is set.
 Set routing mark by default.
 
 Takes no effect if `outbound.routing_mark` is set.
+
+#### stop_always_resolve_udp
+
+If not set, the requested domain name will be resolved to IP before routing when the inbound stream is udp.
+
+If `domain_strategy` is not in effect, domain will be resolved with `dns.rules`.
