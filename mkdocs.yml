@@ -107,6 +107,8 @@ nav:
       - Inbound:
           - configuration/inbound/index.md
           - Direct: configuration/inbound/direct.md
+          - DOH: configuration/inbound/doh.md
+          - DOQ: configuration/inbound/doq.md
           - Mixed: configuration/inbound/mixed.md
           - SOCKS: configuration/inbound/socks.md
           - HTTP: configuration/inbound/http.md

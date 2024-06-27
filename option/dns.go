@@ -38,3 +38,20 @@ type DNSFakeIPOptions struct {
 	Inet4Range *netip.Prefix `json:"inet4_range,omitempty"`
 	Inet6Range *netip.Prefix `json:"inet6_range,omitempty"`
 }
+
+type DOHInboundOptions struct {
+	Network     NetworkList    `json:"network,omitempty"`
+	Listen      *ListenAddress `json:"listen,omitempty"`
+	ListenPort  uint16         `json:"listen_port,omitempty"`
+	QueryPath   string         `json:"query_path,omitempty"`
+	UDPFragment *bool          `json:"udp_fragment,omitempty"`
+	InboundTLSOptionsContainer
+}
+
+type DOQInboundOptions struct {
+	Listen           *ListenAddress `json:"listen,omitempty"`
+	ListenPort       uint16         `json:"listen_port,omitempty"`
+	ZeroRTTHandshake bool           `json:"zero_rtt_handshake,omitempty"`
+	UDPFragment      *bool          `json:"udp_fragment,omitempty"`
+	InboundTLSOptionsContainer
+}
