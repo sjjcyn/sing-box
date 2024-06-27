@@ -15,6 +15,8 @@ type _Inbound struct {
 	RedirectOptions    RedirectInboundOptions    `json:"-"`
 	TProxyOptions      TProxyInboundOptions      `json:"-"`
 	DirectOptions      DirectInboundOptions      `json:"-"`
+	DOHOptions         DOHInboundOptions         `json:"-"`
+	DOQOptions         DOQInboundOptions         `json:"-"`
 	SocksOptions       SocksInboundOptions       `json:"-"`
 	HTTPOptions        HTTPMixedInboundOptions   `json:"-"`
 	MixedOptions       HTTPMixedInboundOptions   `json:"-"`
@@ -42,6 +44,10 @@ func (h *Inbound) RawOptions() (any, error) {
 		rawOptionsPtr = &h.TProxyOptions
 	case C.TypeDirect:
 		rawOptionsPtr = &h.DirectOptions
+	case C.TypeDOH:
+		rawOptionsPtr = &h.DOHOptions
+	case C.TypeDOQ:
+		rawOptionsPtr = &h.DOQOptions
 	case C.TypeSOCKS:
 		rawOptionsPtr = &h.SocksOptions
 	case C.TypeHTTP:

@@ -18,6 +18,8 @@
 | Type          | Format                        | Injectable |
 |---------------|-------------------------------|------------|
 | `direct`      | [Direct](./direct/)           | X          |
+| `doh`         | [DOH](./doh/)                 | X          |
+| `doq`         | [DOQ](./doq/)                 | X          |
 | `mixed`       | [Mixed](./mixed/)             | TCP        |
 | `socks`       | [SOCKS](./socks/)             | TCP        |
 | `http`        | [HTTP](./http/)               | TCP        |
