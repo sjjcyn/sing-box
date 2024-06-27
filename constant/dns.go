@@ -6,6 +6,7 @@ const (
 )
 
 const (
-	DNSModeRealIP = "real-ip"
-	DNSModeFakeIP = "fake-ip"
+	DNSModeRealIP    = "real-ip"
+	DNSModeFakeIP    = "fake-ip"
+	DNSModeRedirHost = "redir-host"
 )
