@@ -142,6 +142,11 @@ nav:
           - DNS: configuration/outbound/dns.md
           - Selector: configuration/outbound/selector.md
           - URLTest: configuration/outbound/urltest.md
+      - Outbound Provider:
+          - configuration/provider/index.md
+          - Local: configuration/provider/local.md
+          - Remote: configuration/provider/remote.md
+          - Override Dialer: configuration/provider/override_dialer.md
 markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
