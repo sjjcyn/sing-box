@@ -107,6 +107,7 @@
           "geosite-cn"
         ],
         "rule_set_ipcidr_match_source": false,
+        "fake_ip": false,
         "invert": false,
         "skip_resolve": false,
         "outbound": "direct"
@@ -311,6 +312,10 @@ Match [Rule Set](/configuration/route/#rule_set).
 !!! question "Since sing-box 1.8.0"
 
 Make `ipcidr` in rule sets match the source IP.
+
+#### fake_ip
+
+Match FakeIP origin destination.
 
 #### invert
 

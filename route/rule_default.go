@@ -217,6 +217,11 @@ func NewDefaultRule(router adapter.Router, logger log.ContextLogger, options opt
 		rule.ruleSetItems = append(rule.ruleSetItems, item)
 		rule.allItems = append(rule.allItems, item)
 	}
+	if options.FakeIP {
+		item := NewFakeIPItem()
+		rule.items = append(rule.items, item)
+		rule.allItems = append(rule.allItems, item)
+	}
 	return rule, nil
 }
 

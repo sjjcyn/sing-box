@@ -105,6 +105,7 @@
           "geosite-cn"
         ],
         "rule_set_ipcidr_match_source": false,
+        "fake_ip": false,
         "invert": false,
         "skip_resolve": false,
         "outbound": "direct"
@@ -309,6 +310,10 @@
 !!! question "自 sing-box 1.8.0 起"
 
 使规则集中的 `ipcidr` 规则匹配源 IP。
+
+#### fake_ip
+
+匹配入站为 FakeIP 的情况
 
 #### invert
 
