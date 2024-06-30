@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/netip"
+	"strings"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/sagernet/sing-box/adapter"
@@ -10,18 +11,180 @@ import (
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
+	F "github.com/sagernet/sing/common/format"
 )
 
+var _ adapter.FallbackRule = (*FallbackRule)(nil)
+
+type FallbackRule struct {
+	matchAll     bool
+	items        []RuleItem
+	invert       bool
+	server       string
+	disableCache bool
+	rewriteTTL   *uint32
+	clientSubnet *netip.Prefix
+}
+
+func (r *FallbackRule) String() string {
+	result := func() string {
+		if r.matchAll {
+			return "match_all"
+		}
+		result := strings.Join(F.MapToString(r.items), " ")
+		if r.invert {
+			return "!(" + result + ")"
+		}
+		if len(r.items) > 1 {
+			return "[" + result + "]"
+		}
+		return result
+	}()
+	if r.server != "" {
+		result = result + "=>" + r.server
+	}
+	return result
+}
+
+func (r *FallbackRule) Start() error {
+	for _, item := range r.items {
+		err := common.Start(item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *FallbackRule) Match(metadata *adapter.InboundContext) bool {
+	if r.matchAll {
+		return true
+	}
+	for _, item := range r.items {
+		if item.Match(metadata) {
+			return !r.invert
+		}
+	}
+	return r.invert
+}
+
+func (r *FallbackRule) Outbound() string {
+	return r.server
+}
+
+func (r *FallbackRule) DisableCache() bool {
+	return r.disableCache
+}
+
+func (r *FallbackRule) RewriteTTL() *uint32 {
+	return r.rewriteTTL
+}
+
+func (r *FallbackRule) ClientSubnet() *netip.Prefix {
+	return r.clientSubnet
+}
+
+func NewFallbackRules(router adapter.Router, logger log.ContextLogger, fbOptions []option.FallBackRule) ([]adapter.FallbackRule, error) {
+	var fallbackRules []adapter.FallbackRule
+	for i, options := range fbOptions {
+		if !options.IsValid() {
+			return nil, E.New("fallback_rule[", i, "] missing conditions")
+		}
+		var items []RuleItem
+		if len(options.IPCIDR) > 0 {
+			item, err := NewIPCIDRItem(false, options.IPCIDR)
+			if err != nil {
+				return nil, E.Cause(err, "ipcidr")
+			}
+			items = append(items, item)
+		}
+		if options.IPIsPrivate {
+			item := NewIPIsPrivateItem(false)
+			items = append(items, item)
+		}
+		if len(options.GeoIP) > 0 {
+			item := NewGeoIPItem(router, logger, false, options.GeoIP)
+			items = append(items, item)
+		}
+		if len(options.RuleSet) > 0 {
+			item := NewRuleSetItem(router, options.RuleSet, false)
+			items = append(items, item)
+		}
+		fallbackRules = append(fallbackRules, &FallbackRule{
+			options.MatchAll,
+			items,
+			options.Invert,
+			options.Server,
+			options.DisableCache,
+			options.RewriteTTL,
+			(*netip.Prefix)(options.ClientSubnet),
+		})
+	}
+	return fallbackRules, nil
+}
+
+type abstractDNSRule struct {
+	fallbackRules []adapter.FallbackRule
+	disableCache  bool
+	rewriteTTL    *uint32
+	clientSubnet  *netip.Prefix
+}
+
+func (r *abstractDNSRule) DisableCache() bool {
+	return r.disableCache
+}
+
+func (r *abstractDNSRule) RewriteTTL() *uint32 {
+	return r.rewriteTTL
+}
+
+func (r *abstractDNSRule) ClientSubnet() *netip.Prefix {
+	return r.clientSubnet
+}
+
+func (r *abstractDNSRule) FallbackRules() []adapter.FallbackRule {
+	return r.fallbackRules
+}
+
+func (r *abstractDNSRule) FallbackString() string {
+	if len(r.fallbackRules) == 0 {
+		return ""
+	}
+	if len(r.fallbackRules) == 1 {
+		return " fallback_rule=" + r.fallbackRules[0].String()
+	}
+	result := strings.Join(common.Map(r.fallbackRules, func(it adapter.FallbackRule) string {
+		return it.String()
+	}), " ")
+	return " fallback_rules=[" + result + "]"
+}
+
+func (r *abstractDNSRule) Start() error {
+	if len(r.fallbackRules) > 0 {
+		for _, rule := range r.fallbackRules {
+			err := rule.Start()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func NewDNSRule(router adapter.Router, logger log.ContextLogger, options option.DNSRule, checkServer bool) (adapter.DNSRule, error) {
+	fallbackRules, err := NewFallbackRules(router, logger, options.FallBackRules)
+	if err != nil {
+		return nil, err
+	}
 	switch options.Type {
 	case "", C.RuleTypeDefault:
-		if !options.DefaultOptions.IsValid() {
+		if len(options.FallBackRules) == 0 && !options.DefaultOptions.IsValid() {
 			return nil, E.New("missing conditions")
 		}
 		if options.DefaultOptions.Server == "" && checkServer {
 			return nil, E.New("missing server field")
 		}
-		return NewDefaultDNSRule(router, logger, options.DefaultOptions)
+		return NewDefaultDNSRule(router, logger, options.DefaultOptions, fallbackRules)
 	case C.RuleTypeLogical:
 		if !options.LogicalOptions.IsValid() {
 			return nil, E.New("missing conditions")
@@ -29,7 +192,7 @@ func NewDNSRule(router adapter.Router, logger log.ContextLogger, options option.
 		if options.LogicalOptions.Server == "" && checkServer {
 			return nil, E.New("missing server field")
 		}
-		return NewLogicalDNSRule(router, logger, options.LogicalOptions)
+		return NewLogicalDNSRule(router, logger, options.LogicalOptions, fallbackRules)
 	default:
 		return nil, E.New("unknown rule type: ", options.Type)
 	}
@@ -39,12 +202,10 @@ var _ adapter.DNSRule = (*DefaultDNSRule)(nil)
 
 type DefaultDNSRule struct {
 	abstractDefaultRule
-	disableCache bool
-	rewriteTTL   *uint32
-	clientSubnet *netip.Prefix
+	abstractDNSRule
 }
 
-func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options option.DefaultDNSRule) (*DefaultDNSRule, error) {
+func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options option.DefaultDNSRule, fallbackRules []adapter.FallbackRule) (*DefaultDNSRule, error) {
 	id, _ := uuid.NewV4()
 	rule := &DefaultDNSRule{
 		abstractDefaultRule: abstractDefaultRule{
@@ -54,9 +215,12 @@ func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options 
 				outbound: options.Server,
 			},
 		},
-		disableCache: options.DisableCache,
-		rewriteTTL:   options.RewriteTTL,
-		clientSubnet: (*netip.Prefix)(options.ClientSubnet),
+		abstractDNSRule: abstractDNSRule{
+			fallbackRules,
+			options.DisableCache,
+			options.RewriteTTL,
+			(*netip.Prefix)(options.ClientSubnet),
+		},
 	}
 	if len(options.Inbound) > 0 {
 		item := NewInboundRule(options.Inbound)
@@ -232,16 +396,23 @@ func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options 
 	return rule, nil
 }
 
-func (r *DefaultDNSRule) DisableCache() bool {
-	return r.disableCache
+func (r *DefaultDNSRule) String() string {
+	return r.abstractDefaultRule.String() + r.abstractDNSRule.FallbackString()
 }
 
-func (r *DefaultDNSRule) RewriteTTL() *uint32 {
-	return r.rewriteTTL
-}
-
-func (r *DefaultDNSRule) ClientSubnet() *netip.Prefix {
-	return r.clientSubnet
+func (r *DefaultDNSRule) Start() error {
+	if err := r.abstractDefaultRule.Start(); err != nil {
+		return err
+	}
+	if len(r.fallbackRules) == 0 {
+		return nil
+	}
+	for _, rule := range r.fallbackRules {
+		if err := rule.Start(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *DefaultDNSRule) WithAddressLimit() bool {
@@ -276,12 +447,10 @@ var _ adapter.DNSRule = (*LogicalDNSRule)(nil)
 
 type LogicalDNSRule struct {
 	abstractLogicalRule
-	disableCache bool
-	rewriteTTL   *uint32
-	clientSubnet *netip.Prefix
+	abstractDNSRule
 }
 
-func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options option.LogicalDNSRule) (*LogicalDNSRule, error) {
+func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options option.LogicalDNSRule, fallbackRules []adapter.FallbackRule) (*LogicalDNSRule, error) {
 	id, _ := uuid.NewV4()
 	r := &LogicalDNSRule{
 		abstractLogicalRule: abstractLogicalRule{
@@ -292,9 +461,12 @@ func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options 
 			},
 			rules: make([]adapter.HeadlessRule, len(options.Rules)),
 		},
-		disableCache: options.DisableCache,
-		rewriteTTL:   options.RewriteTTL,
-		clientSubnet: (*netip.Prefix)(options.ClientSubnet),
+		abstractDNSRule: abstractDNSRule{
+			fallbackRules,
+			options.DisableCache,
+			options.RewriteTTL,
+			(*netip.Prefix)(options.ClientSubnet),
+		},
 	}
 	switch options.Mode {
 	case C.LogicalTypeAnd:
@@ -314,16 +486,23 @@ func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options 
 	return r, nil
 }
 
-func (r *LogicalDNSRule) DisableCache() bool {
-	return r.disableCache
+func (r *LogicalDNSRule) String() string {
+	return r.abstractLogicalRule.String() + r.abstractDNSRule.FallbackString()
 }
 
-func (r *LogicalDNSRule) RewriteTTL() *uint32 {
-	return r.rewriteTTL
-}
-
-func (r *LogicalDNSRule) ClientSubnet() *netip.Prefix {
-	return r.clientSubnet
+func (r *LogicalDNSRule) Start() error {
+	if err := r.abstractLogicalRule.Start(); err != nil {
+		return err
+	}
+	if len(r.fallbackRules) == 0 {
+		return nil
+	}
+	for _, rule := range r.fallbackRules {
+		if err := rule.Start(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *LogicalDNSRule) WithAddressLimit() bool {

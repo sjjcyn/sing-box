@@ -190,11 +190,13 @@ func (r *abstractDefaultRule) String() string {
 	if r.tag != "" {
 		return "rule[" + r.tag + "]"
 	}
+	if len(r.allItems) == 0 {
+		return "match_all"
+	}
 	if !r.invert {
 		return strings.Join(F.MapToString(r.allItems), " ")
-	} else {
-		return "!(" + strings.Join(F.MapToString(r.allItems), " ") + ")"
 	}
+	return "!(" + strings.Join(F.MapToString(r.allItems), " ") + ")"
 }
 
 type abstractLogicalRule struct {
@@ -287,7 +289,6 @@ func (r *abstractLogicalRule) String() string {
 	}
 	if !r.invert {
 		return strings.Join(F.MapToString(r.rules), " "+op+" ")
-	} else {
-		return "!(" + strings.Join(F.MapToString(r.rules), " "+op+" ") + ")"
 	}
+	return "!(" + strings.Join(F.MapToString(r.rules), " "+op+" ") + ")"
 }
