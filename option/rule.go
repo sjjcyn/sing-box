@@ -96,6 +96,7 @@ type DefaultRule struct {
 	WIFIBSSID                Listable[string] `json:"wifi_bssid,omitempty"`
 	RuleSet                  Listable[string] `json:"rule_set,omitempty"`
 	RuleSetIPCIDRMatchSource bool             `json:"rule_set_ipcidr_match_source,omitempty"`
+	FakeIP                   bool             `json:"fake_ip,omitempty"`
 	Invert                   bool             `json:"invert,omitempty"`
 	SkipResolve              bool             `json:"skip_resolve,omitempty"`
 	Outbound                 string           `json:"outbound,omitempty"`
