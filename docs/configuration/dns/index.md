@@ -20,6 +20,7 @@ icon: material/new-box
     "disable_cache": false,
     "disable_expire": false,
     "independent_cache": false,
+    "lazy_cache": false,
     "reverse_mapping": false,
     "mapping_override": false,
     "client_subnet": "",
@@ -69,6 +70,11 @@ Disable dns cache expire.
 #### independent_cache
 
 Make each DNS server's cache independent for special purposes. If enabled, will slightly degrade performance.
+
+#### lazy_cache
+
+When matching an expired dns response cache, it will be return immediately with TTL rewritten as 0, and handling the 
+query as well.
 
 #### reverse_mapping
 

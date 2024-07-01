@@ -20,6 +20,7 @@ icon: material/new-box
     "disable_cache": false,
     "disable_expire": false,
     "independent_cache": false,
+    "lazy_cache": false,
     "reverse_mapping": false,
     "mapping_override": false,
     "client_subnet": "",
@@ -68,6 +69,10 @@ icon: material/new-box
 #### independent_cache
 
 使每个 DNS 服务器的缓存独立，以满足特殊目的。如果启用，将轻微降低性能。
+
+#### lazy_cache
+
+当缓存查询命中一个已过期的 DNS 回应缓存时，立即返回一个 TTL 为 0 的 DNS 回应，并同时进行 DNS 查询。
 
 #### reverse_mapping
 
