@@ -149,6 +149,7 @@ func NewRouter(
 			return len(inbound.TunOptions.IncludePackage) > 0 || len(inbound.TunOptions.ExcludePackage) > 0
 		}),
 	}
+	dialer.ConcurrentDial = options.ConcurrentDial
 	var dnsHosts *dns.Hosts
 	if len(dnsOptions.Hosts) > 0 {
 		var err error
