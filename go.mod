@@ -57,7 +57,7 @@ require (
 	howett.net/plist v1.0.1
 )
 
-replace github.com/sagernet/sing-dns v0.2.0 => github.com/puernya/sing-dns v0.0.0-20240628034157-d3adb0fb5f86
+replace github.com/sagernet/sing-dns v0.2.0 => github.com/puernya/sing-dns v0.0.0-20240701164006-6857e32c2b74
 
 replace github.com/sagernet/sing-tun v0.3.2 => github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33
 

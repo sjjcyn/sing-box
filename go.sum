@@ -94,8 +94,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/puernya/sing v0.0.0-20240702155112-8dd08bd85dcd h1:wYcKTYHyeMjWrHQUuoX4g9ySPAKF2ssggWDQtvXICKc=
 github.com/puernya/sing v0.0.0-20240702155112-8dd08bd85dcd/go.mod h1:ieZHA/+Y9YZfXs2I3WtuwgyCZ6GPsIR7HdKb1SdEnls=
-github.com/puernya/sing-dns v0.0.0-20240628034157-d3adb0fb5f86 h1:zPxp6PwcGqY3YQ9g7uaJFAY4trcegKxx272BvzGXi2s=
-github.com/puernya/sing-dns v0.0.0-20240628034157-d3adb0fb5f86/go.mod h1:BJpJv6XLnrUbSyIntOT6DG9FW0f4fETmPAHvNjOprLg=
+github.com/puernya/sing-dns v0.0.0-20240701164006-6857e32c2b74 h1:R1yNb6XinE4on4JslJptHA4qxZ89CxIAsFEI552sNYM=
+github.com/puernya/sing-dns v0.0.0-20240701164006-6857e32c2b74/go.mod h1:BJpJv6XLnrUbSyIntOT6DG9FW0f4fETmPAHvNjOprLg=
 github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33 h1:Pg43kMURcQxpDEBwH7HUUE87RT6O6G6WkInwLJsTE4c=
 github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33/go.mod h1:DxLIyhjWU/HwGYoX0vNGg2c5QgTQIakphU1MuERR5tQ=
 github.com/quic-go/qpack v0.4.0 h1:Cr9BXA1sQS2SmDUWjSofMPNKmvF6IiIfDRmgU0w1ZCo=
