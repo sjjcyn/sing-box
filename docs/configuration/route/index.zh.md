@@ -21,7 +21,8 @@
     "default_interface": "en0",
     "default_mark": 233,
     "udp_disable_domain_unmapping": false,
-    "stop_always_resolve_udp": false
+    "stop_always_resolve_udp": false,
+    "concurrent_dial": false
   }
 }
 ```
@@ -90,3 +91,7 @@
 如果没有被设置，当入站流量为 udp 时，请求的域名将在路由之前解析为 IP。
 
 如果未设置 `domain_strategy`，将按照 `dns.rules` 执行。
+
+#### concurrent_dial
+
+并发每个拨号三次并返回最先打开的连接。

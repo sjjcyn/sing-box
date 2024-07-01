@@ -4,7 +4,6 @@ package dialer
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net"
 	"os"
@@ -34,9 +33,9 @@ func DialSlowContext(dialer *tcpDialer, ctx context.Context, network string, des
 	if dialer.DisableTFO || N.NetworkName(network) != N.NetworkTCP {
 		switch N.NetworkName(network) {
 		case N.NetworkTCP, N.NetworkUDP:
-			return dialContextWithRetry(dialer.Dialer, ctx, network, destination.String())
+			return dialContextConcurrently(dialer.Dialer, ctx, network, destination.String())
 		default:
-			return dialContextWithRetry(dialer.Dialer, ctx, network, destination.AddrString())
+			return dialContextConcurrently(dialer.Dialer, ctx, network, destination.AddrString())
 		}
 	}
 	return &slowOpenConn{
@@ -52,19 +51,27 @@ func tfoDialContextWithRetry(dialer *tfo.Dialer, ctx context.Context, network st
 	var err error
 	for i := 0; i < 4; i++ {
 		var conn net.Conn
-		var thisErr error
-		conn, thisErr = dialer.DialContext(ctx, network, address, b)
-		if thisErr == nil {
+		conn, err = dialer.DialContext(ctx, network, address, b)
+		if err == nil {
 			return conn, nil
-		}
-		if !errors.Is(thisErr, context.DeadlineExceeded) || err == nil {
-			err = thisErr
-		}
-		if errors.Is(thisErr, context.DeadlineExceeded) {
-			break
 		}
 	}
 	return nil, err
+}
+
+func tfoDialContextConcurrently(dialer *tfo.Dialer, ctx context.Context, network string, address string, b []byte) (net.Conn, error) {
+	if !ConcurrentDial {
+		return tfoDialContextWithRetry(dialer, ctx, network, address, b)
+	}
+	connChan := make(chan ConnWithErr, 3)
+	for i := 0; i < 3; i++ {
+		go func() {
+			var conn ConnWithErr
+			conn.conn, conn.err = tfoDialContextWithRetry(dialer, ctx, network, address, b)
+			connChan <- conn
+		}()
+	}
+	return getResultFromConnChan(connChan)
 }
 
 func (c *slowOpenConn) Read(b []byte) (n int, err error) {
@@ -95,7 +102,7 @@ func (c *slowOpenConn) Write(b []byte) (n int, err error) {
 		return c.conn.Write(b)
 	default:
 	}
-	c.conn, err = tfoDialContextWithRetry(c.dialer, c.ctx, c.network, c.destination.String(), b)
+	c.conn, err = tfoDialContextConcurrently(c.dialer, c.ctx, c.network, c.destination.String(), b)
 	if err != nil {
 		c.conn = nil
 		c.err = E.Cause(err, "dial tcp fast open")

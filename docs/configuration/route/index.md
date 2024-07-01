@@ -21,7 +21,8 @@
     "default_interface": "en0",
     "default_mark": 233,
     "udp_disable_domain_unmapping": false,
-    "stop_always_resolve_udp": false
+    "stop_always_resolve_udp": false,
+    "concurrent_dial": false
   }
 }
 ```
@@ -90,3 +91,7 @@ Takes no effect if `outbound.routing_mark` is set.
 If not set, the requested domain name will be resolved to IP before routing when the inbound stream is udp.
 
 If `domain_strategy` is not in effect, domain will be resolved with `dns.rules`.
+
+#### concurrent_dial
+
+If not set, every dial will be triple-concurrently. The fastest connection opened will be returned.
