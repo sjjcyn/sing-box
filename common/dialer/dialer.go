@@ -10,6 +10,14 @@ import (
 )
 
 func New(router adapter.Router, options option.DialerOptions) (N.Dialer, error) {
+	return new(router, options, false)
+}
+
+func NewDirect(router adapter.Router, options option.DialerOptions) (N.Dialer, error) {
+	return new(router, options, true)
+}
+
+func new(router adapter.Router, options option.DialerOptions, isDirect bool) (N.Dialer, error) {
 	if options.IsWireGuardListener {
 		return NewDefault(router, options)
 	}
@@ -29,14 +37,16 @@ func New(router adapter.Router, options option.DialerOptions) (N.Dialer, error) 
 		dialer = NewDetour(router, options.Detour)
 	}
 	domainStrategy := dns.DomainStrategy(options.DomainStrategy)
-	if domainStrategy != dns.DomainStrategyAsIS || options.Detour == "" || len(options.ServerAddresses) > 0 {
+	if domainStrategy != dns.DomainStrategyAsIS || options.Detour == "" || (!isDirect && len(options.ServerAddresses) > 0) {
 		dialer = NewResolveDialer(
 			router,
 			dialer,
 			options.ServerAddresses,
 			options.Detour == "" && !options.TCPFastOpen && domainStrategy != dns.DomainStrategyAsIS,
 			domainStrategy,
-			time.Duration(options.FallbackDelay))
+			time.Duration(options.FallbackDelay),
+			isDirect,
+			options.StoreLastIP)
 	}
 	return dialer, nil
 }

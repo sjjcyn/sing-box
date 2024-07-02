@@ -155,6 +155,7 @@ type DialerOptions struct {
 	UDPFragmentDefault  bool                    `json:"-"`
 	DomainStrategy      DomainStrategy          `json:"domain_strategy,omitempty"`
 	FallbackDelay       Duration                `json:"fallback_delay,omitempty"`
+	StoreLastIP         bool                    `json:"store_last_ip,omitempty"`
 	IsWireGuardListener bool                    `json:"-"`
 }
 
