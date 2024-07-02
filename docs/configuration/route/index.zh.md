@@ -22,7 +22,8 @@
     "default_mark": 233,
     "udp_disable_domain_unmapping": false,
     "stop_always_resolve_udp": false,
-    "concurrent_dial": false
+    "concurrent_dial": false,
+    "keep_alive_interval": "15s"
   }
 }
 ```
@@ -95,3 +96,10 @@
 #### concurrent_dial
 
 并发每个拨号三次并返回最先打开的连接。
+
+#### keep_alive_interval
+
+发送 TCP keep-alive 包的周期。默认使用 `15s`。
+
+周期时间字符串是一个可能有符号的序列十进制数，每个都有可选的分数和单位后缀， 例如 "300ms"、"-1.5h" 或 "2h45m"。
+有效时间单位为 "ns"、"us"（或 "µs"）、"ms"、"s"、"m"、"h"。

@@ -150,6 +150,9 @@ func NewRouter(
 		}),
 	}
 	dialer.ConcurrentDial = options.ConcurrentDial
+	if options.KeepAliveInterval != 0 {
+		C.TCPKeepAliveInterval = time.Duration(options.KeepAliveInterval)
+	}
 	var dnsHosts *dns.Hosts
 	if len(dnsOptions.Hosts) > 0 {
 		var err error

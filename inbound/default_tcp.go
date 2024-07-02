@@ -7,7 +7,6 @@ import (
 	"github.com/sagernet/sing-box/adapter"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
-	"github.com/sagernet/sing/common/control"
 	E "github.com/sagernet/sing/common/exceptions"
 	M "github.com/sagernet/sing/common/metadata"
 	N "github.com/sagernet/sing/common/network"
@@ -19,8 +18,7 @@ func (a *myInboundAdapter) ListenTCP() (net.Listener, error) {
 	var tcpListener net.Listener
 	var listenConfig net.ListenConfig
 	// TODO: Add an option to customize the keep alive period
-	listenConfig.KeepAlive = C.TCPKeepAliveInitial
-	listenConfig.Control = control.Append(listenConfig.Control, control.SetKeepAlivePeriod(C.TCPKeepAliveInitial, C.TCPKeepAliveInterval))
+	listenConfig.KeepAlive = C.TCPKeepAliveInterval
 	if a.listenOptions.TCPMultiPath {
 		if !go121Available {
 			return nil, E.New("MultiPath TCP requires go1.21, please recompile your binary.")
