@@ -14,7 +14,8 @@
   "tcp_multi_path": false,
   "udp_fragment": false,
   "domain_strategy": "prefer_ipv6",
-  "fallback_delay": "300ms"
+  "fallback_delay": "300ms",
+  "store_last_ip": false
 }
 ```
 
@@ -102,3 +103,7 @@ that IPv4/IPv6 is misconfigured and falling back to other type of addresses.
 If zero, a default delay of 300ms is used.
 
 Only take effect when `domain_strategy` is set.
+
+#### store_last_ip
+
+Store last address of successful dial which will be used first at the next dial.

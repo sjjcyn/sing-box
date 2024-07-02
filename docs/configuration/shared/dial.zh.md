@@ -14,7 +14,8 @@
   "tcp_multi_path": false,
   "udp_fragment": false,
   "domain_strategy": "prefer_ipv6",
-  "fallback_delay": "300ms"
+  "fallback_delay": "300ms",
+  "store_last_ip": false
 }
 ```
 
@@ -99,3 +100,7 @@
 如果为零，则使用 300 毫秒的默认延迟。
 
 仅当 `domain_strategy` 为 `prefer_ipv4` 或 `prefer_ipv6` 时生效。
+
+#### store_last_ip
+
+将上次拨号成功的地址存储起来并优先在下次拨号时使用。

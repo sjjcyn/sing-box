@@ -32,6 +32,7 @@ type OverrideDialerOptions struct {
 	UDPFragment      *bool           `json:"udp_fragment,omitempty"`
 	DomainStrategy   *DomainStrategy `json:"domain_strategy,omitempty"`
 	FallbackDelay    *Duration       `json:"fallback_delay,omitempty"`
+	StoreLastIP      *bool           `json:"store_last_ip,omitempty"`
 }
 
 type LocalProviderOptions struct {
