@@ -117,13 +117,12 @@ func (h *Direct) DialParallel(ctx context.Context, network string, destination M
 	case N.NetworkUDP:
 		h.logger.InfoContext(ctx, "outbound packet connection to ", destination)
 	}
-	var domainStrategy dns.DomainStrategy
 	if h.domainStrategy != dns.DomainStrategyAsIS {
-		domainStrategy = h.domainStrategy
-	} else {
-		domainStrategy = dns.DomainStrategy(metadata.InboundOptions.DomainStrategy)
+		return N.DialParallel(ctx, h.dialer, network, destination, destinationAddresses, h.domainStrategy == dns.DomainStrategyPreferIPv6, h.fallbackDelay)
+	} else if domainStrategy := dns.DomainStrategy(metadata.InboundOptions.DomainStrategy); domainStrategy != dns.DomainStrategyAsIS {
+		return N.DialParallel(ctx, h.dialer, network, destination, destinationAddresses, domainStrategy == dns.DomainStrategyPreferIPv6, h.fallbackDelay)
 	}
-	return N.DialParallel(ctx, h.dialer, network, destination, destinationAddresses, domainStrategy == dns.DomainStrategyPreferIPv6, h.fallbackDelay)
+	return N.DialSerial(ctx, h.dialer, network, destination, destinationAddresses)
 }
 
 func (h *Direct) ListenPacket(ctx context.Context, destination M.Socksaddr) (net.PacketConn, error) {
