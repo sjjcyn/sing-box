@@ -34,7 +34,7 @@ func New(router adapter.Router, options option.DialerOptions) (N.Dialer, error) 
 			router,
 			dialer,
 			options.ServerAddresses,
-			options.Detour == "" && !options.TCPFastOpen,
+			options.Detour == "" && !options.TCPFastOpen && domainStrategy != dns.DomainStrategyAsIS,
 			domainStrategy,
 			time.Duration(options.FallbackDelay))
 	}
