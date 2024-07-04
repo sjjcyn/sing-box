@@ -642,7 +642,7 @@ func (r *Router) Start() error {
 	r.dnsClient.Start()
 	monitor.Finish()
 
-	if C.IsAndroid && r.platformInterface == nil {
+	if C.IsAndroid && r.platformInterface == nil && !r.needFindProcess {
 		monitor.Start("initialize package manager")
 		packageManager, err := tun.NewPackageManager(r)
 		monitor.Finish()
@@ -809,7 +809,7 @@ func (r *Router) PostStart() error {
 			needWIFIStateFromRuleSet = true
 		}
 	}
-	if needProcessFromRuleSet || r.needFindProcess {
+	if r.packageManager != nil && (needProcessFromRuleSet || r.needFindProcess) {
 		if r.platformInterface != nil {
 			r.processSearcher = r.platformInterface
 		} else {
