@@ -61,6 +61,7 @@ type InboundContext struct {
 	IgnoreDestinationIPCIDRMatch bool
 	IsResolved                   bool
 	DnsFallBack                  bool
+	FakeIPFilter                 bool
 }
 
 func (c *InboundContext) ResetRuleCache() {

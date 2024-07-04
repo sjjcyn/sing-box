@@ -34,10 +34,20 @@ type DNSClientOptions struct {
 	ClientSubnet     *AddrPrefix    `json:"client_subnet,omitempty"`
 }
 
+type ExcludeRule struct {
+	Domain        Listable[string] `json:"domain,omitempty"`
+	DomainSuffix  Listable[string] `json:"domain_suffix,omitempty"`
+	DomainKeyword Listable[string] `json:"domain_keyword,omitempty"`
+	DomainRegex   Listable[string] `json:"domain_regex,omitempty"`
+	Geosite       Listable[string] `json:"geosite,omitempty"`
+	RuleSet       Listable[string] `json:"rule_set,omitempty"`
+}
+
 type DNSFakeIPOptions struct {
-	Enabled    bool          `json:"enabled,omitempty"`
-	Inet4Range *netip.Prefix `json:"inet4_range,omitempty"`
-	Inet6Range *netip.Prefix `json:"inet6_range,omitempty"`
+	Enabled     bool          `json:"enabled,omitempty"`
+	Inet4Range  *netip.Prefix `json:"inet4_range,omitempty"`
+	Inet6Range  *netip.Prefix `json:"inet6_range,omitempty"`
+	ExcludeRule ExcludeRule   `json:"exclude_rule,omitempty"`
 }
 
 type DOHInboundOptions struct {

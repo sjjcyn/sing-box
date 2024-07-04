@@ -12,7 +12,75 @@ import (
 	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
 	F "github.com/sagernet/sing/common/format"
+	"github.com/sagernet/sing/common/logger"
 )
+
+var _ adapter.ExcludeRule = (*ExcludeRule)(nil)
+
+type ExcludeRule struct {
+	items []RuleItem
+}
+
+func (r *ExcludeRule) Match(metadata *adapter.InboundContext) bool {
+	return common.Any(r.items, func(item RuleItem) bool {
+		return item.Match(metadata)
+	})
+}
+
+func (r *ExcludeRule) String() string {
+	return strings.Join(F.MapToString(r.items), " ")
+}
+
+func (r *ExcludeRule) Start() error {
+	for _, item := range r.items {
+		err := common.Start(item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *ExcludeRule) Close() error {
+	for _, item := range r.items {
+		err := common.Close(item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewExcludeRule(router adapter.Router, logger logger.ContextLogger, excludeRuleOptions option.ExcludeRule) (adapter.ExcludeRule, error) {
+	var items []RuleItem
+	if len(excludeRuleOptions.Domain) > 0 || len(excludeRuleOptions.DomainSuffix) > 0 {
+		item := NewDomainItem(excludeRuleOptions.Domain, excludeRuleOptions.DomainSuffix)
+		items = append(items, item)
+	}
+	if len(excludeRuleOptions.DomainKeyword) > 0 {
+		item := NewDomainKeywordItem(excludeRuleOptions.DomainKeyword)
+		items = append(items, item)
+	}
+	if len(excludeRuleOptions.DomainRegex) > 0 {
+		item, err := NewDomainRegexItem(excludeRuleOptions.DomainRegex)
+		if err != nil {
+			return nil, E.Cause(err, "domain_regex")
+		}
+		items = append(items, item)
+	}
+	if len(excludeRuleOptions.Geosite) > 0 {
+		item := NewGeositeItem(router, logger, excludeRuleOptions.Geosite)
+		items = append(items, item)
+	}
+	if len(excludeRuleOptions.RuleSet) > 0 {
+		item := NewRuleSetItem(router, excludeRuleOptions.RuleSet, false)
+		items = append(items, item)
+	}
+	if len(items) == 0 {
+		return nil, nil
+	}
+	return &ExcludeRule{items}, nil
+}
 
 var _ adapter.FallbackRule = (*FallbackRule)(nil)
 

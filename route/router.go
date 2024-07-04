@@ -407,7 +407,11 @@ func NewRouter(
 		if fakeIPOptions.Inet6Range != nil {
 			inet6Range = *fakeIPOptions.Inet6Range
 		}
-		router.fakeIPStore = fakeip.NewStore(ctx, router.logger, inet4Range, inet6Range)
+		excludeRule, err := NewExcludeRule(router, router.logger, fakeIPOptions.ExcludeRule)
+		if err != nil {
+			return nil, E.Cause(err, "parse fakeip exclude_rule")
+		}
+		router.fakeIPStore = fakeip.NewStore(ctx, router.logger, inet4Range, inet6Range, excludeRule)
 	}
 
 	usePlatformDefaultInterfaceMonitor := platformInterface != nil && platformInterface.UsePlatformDefaultInterfaceMonitor()

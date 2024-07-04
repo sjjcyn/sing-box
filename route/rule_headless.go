@@ -171,6 +171,11 @@ func (r *DefaultHeadlessRule) Match(metadata *adapter.InboundContext) bool {
 			return it.Match(metadata)
 		})
 	}
+	if metadata.FakeIPFilter {
+		return common.Any(r.destinationAddressItems, func(it RuleItem) bool {
+			return it.Match(metadata)
+		})
+	}
 	return r.abstractDefaultRule.Match(metadata)
 }
 

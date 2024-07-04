@@ -7,12 +7,20 @@ import (
 	"github.com/sagernet/sing/common/logger"
 )
 
+type ExcludeRule interface {
+	Start() error
+	Close() error
+	Match(metadata *InboundContext) bool
+	String() string
+}
+
 type FakeIPStore interface {
 	Service
 	Contains(address netip.Addr) bool
 	Create(domain string, isIPv6 bool) (netip.Addr, error)
 	Lookup(address netip.Addr) (string, bool)
 	Reset() error
+	ExcludeRule() ExcludeRule
 }
 
 type FakeIPStorage interface {

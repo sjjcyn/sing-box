@@ -17,17 +17,19 @@ type Store struct {
 	logger       logger.Logger
 	inet4Range   netip.Prefix
 	inet6Range   netip.Prefix
+	excludeRule  adapter.ExcludeRule
 	storage      adapter.FakeIPStorage
 	inet4Current netip.Addr
 	inet6Current netip.Addr
 }
 
-func NewStore(ctx context.Context, logger logger.Logger, inet4Range netip.Prefix, inet6Range netip.Prefix) *Store {
+func NewStore(ctx context.Context, logger logger.Logger, inet4Range netip.Prefix, inet6Range netip.Prefix, excludeRule adapter.ExcludeRule) *Store {
 	return &Store{
-		ctx:        ctx,
-		logger:     logger,
-		inet4Range: inet4Range,
-		inet6Range: inet6Range,
+		ctx:         ctx,
+		logger:      logger,
+		inet4Range:  inet4Range,
+		inet6Range:  inet6Range,
+		excludeRule: excludeRule,
 	}
 }
 
@@ -54,6 +56,12 @@ func (s *Store) Start() error {
 		_ = storage.FakeIPReset()
 	}
 	s.storage = storage
+	if s.excludeRule != nil {
+		err := s.excludeRule.Start()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -62,6 +70,12 @@ func (s *Store) Contains(address netip.Addr) bool {
 }
 
 func (s *Store) Close() error {
+	if s.excludeRule != nil {
+		err := s.excludeRule.Close()
+		if err != nil {
+			return err
+		}
+	}
 	if s.storage == nil {
 		return nil
 	}
@@ -107,6 +121,10 @@ func (s *Store) Create(domain string, isIPv6 bool) (netip.Addr, error) {
 		Inet6Current: s.inet6Current,
 	})
 	return address, nil
+}
+
+func (s *Store) ExcludeRule() adapter.ExcludeRule {
+	return s.excludeRule
 }
 
 func (s *Store) Lookup(address netip.Addr) (string, bool) {
