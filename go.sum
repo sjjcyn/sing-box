@@ -96,8 +96,8 @@ github.com/puernya/sing v0.0.0-20240702155112-8dd08bd85dcd h1:wYcKTYHyeMjWrHQUuo
 github.com/puernya/sing v0.0.0-20240702155112-8dd08bd85dcd/go.mod h1:ieZHA/+Y9YZfXs2I3WtuwgyCZ6GPsIR7HdKb1SdEnls=
 github.com/puernya/sing-dns v0.0.0-20240703131650-f4f10306f501 h1:t0N4Ix4kVwXANiimeZ1Z3MjdFg1lVdd0pAU52XJhNFc=
 github.com/puernya/sing-dns v0.0.0-20240703131650-f4f10306f501/go.mod h1:BJpJv6XLnrUbSyIntOT6DG9FW0f4fETmPAHvNjOprLg=
-github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33 h1:Pg43kMURcQxpDEBwH7HUUE87RT6O6G6WkInwLJsTE4c=
-github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33/go.mod h1:DxLIyhjWU/HwGYoX0vNGg2c5QgTQIakphU1MuERR5tQ=
+github.com/puernya/sing-tun v0.0.0-20240704163448-e7659eff06ba h1:U8ztI/9dOH3GZclsD84gTmaBVqvIfw18gh7QzuUy3Zc=
+github.com/puernya/sing-tun v0.0.0-20240704163448-e7659eff06ba/go.mod h1:DxLIyhjWU/HwGYoX0vNGg2c5QgTQIakphU1MuERR5tQ=
 github.com/quic-go/qpack v0.4.0 h1:Cr9BXA1sQS2SmDUWjSofMPNKmvF6IiIfDRmgU0w1ZCo=
 github.com/quic-go/qpack v0.4.0/go.mod h1:UZVnYIfi5GRk+zI9UMaCPsmZ2xKJP7XBUvVyT1Knj9A=
 github.com/quic-go/qtls-go1-20 v0.4.1 h1:D33340mCNDAIKBqXuAvexTNMUByrYmFYVfKfDN5nfFs=

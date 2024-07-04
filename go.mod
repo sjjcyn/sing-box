@@ -59,7 +59,7 @@ require (
 
 replace github.com/sagernet/sing-dns v0.2.0 => github.com/puernya/sing-dns v0.0.0-20240703131650-f4f10306f501
 
-replace github.com/sagernet/sing-tun v0.3.2 => github.com/puernya/sing-tun v0.0.0-20240613145259-aafb943eaa33
+replace github.com/sagernet/sing-tun v0.3.2 => github.com/puernya/sing-tun v0.0.0-20240704163448-e7659eff06ba
 
 replace github.com/sagernet/sing v0.4.1 => github.com/puernya/sing v0.0.0-20240702155112-8dd08bd85dcd
 

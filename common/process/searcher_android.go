@@ -22,28 +22,22 @@ func (s *androidSearcher) FindProcessInfo(ctx context.Context, network string, s
 	if err != nil {
 		return nil, err
 	}
+	info := Info{
+		UserId: int32(uid),
+	}
 	if processPath, _ := resolveProcessNameByProcSearch(inode, uid); processPath != "" {
-		info := Info{
-			UserId: int32(uid),
+		info.ProcessPath = processPath
+		if s.packageManager != nil {
+			if _, loaded := s.packageManager.IDByPackage(processPath); loaded {
+				info.PackageName = processPath
+			}
 		}
-		if _, loaded := s.packageManager.IDByPackage(processPath); loaded {
-			info.PackageName = processPath
-		} else {
-			info.ProcessPath = processPath
+	} else if s.packageManager != nil {
+		if sharedPackage, loaded := s.packageManager.SharedPackageByID(uid % 100000); loaded {
+			info.PackageName = sharedPackage
+		} else if packageName, loaded := s.packageManager.PackageByID(uid % 100000); loaded {
+			info.PackageName = packageName
 		}
-		return &info, nil
 	}
-	if sharedPackage, loaded := s.packageManager.SharedPackageByID(uid % 100000); loaded {
-		return &Info{
-			UserId:      int32(uid),
-			PackageName: sharedPackage,
-		}, nil
-	}
-	if packageName, loaded := s.packageManager.PackageByID(uid % 100000); loaded {
-		return &Info{
-			UserId:      int32(uid),
-			PackageName: packageName,
-		}, nil
-	}
-	return &Info{UserId: int32(uid)}, nil
+	return &info, nil
 }
