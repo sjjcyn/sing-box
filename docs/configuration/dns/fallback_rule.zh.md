@@ -3,7 +3,9 @@
 ```json
 {
   "match_all": false,
-  "clash_mode": "direct",
+  "clash_mode": [
+    "direct"
+  ],
   "geoip": [
     "cn"
   ],

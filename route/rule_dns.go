@@ -91,7 +91,7 @@ func NewFallbackRules(router adapter.Router, logger log.ContextLogger, fbOptions
 			return nil, E.New("fallback_rule[", i, "] missing conditions")
 		}
 		var items []RuleItem
-		if options.ClashMode != "" {
+		if len(options.ClashMode) > 0 {
 			item := NewClashModeItem(router, options.ClashMode)
 			items = append(items, item)
 		}
@@ -382,7 +382,7 @@ func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options 
 		rule.items = append(rule.items, item)
 		rule.allItems = append(rule.allItems, item)
 	}
-	if options.ClashMode != "" {
+	if len(options.ClashMode) > 0 {
 		item := NewClashModeItem(router, options.ClashMode)
 		rule.items = append(rule.items, item)
 		rule.allItems = append(rule.allItems, item)
